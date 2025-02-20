@@ -1,9 +1,23 @@
 services:
   web:
     build:
-        context: .
+      context: .
+      dockerfile: Dockerfile.prod
     ports:
-        - 80:80
+      - 80:80
     volumes:
       - .:/var/www/html:delegated
+    env_file:
+      - .env.production
+    depends_on:
+      - db
+    user: "1000:33"
 
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - 5432:5432

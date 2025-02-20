@@ -11,11 +11,13 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
+    libpq-dev \
+    postgresql-client \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql zip opcache
+RUN docker-php-ext-install pdo_mysql pdo_pgsql pgsql zip opcache
 
 # Enable opcache for production
 RUN docker-php-ext-enable opcache
@@ -31,9 +33,12 @@ WORKDIR /var/www/html
 # Copy application code
 COPY --chown=www-data:www-data . /var/www/html/
 
-# Set file and folder permissions (adjust as needed)
-RUN chown -R www-data:www-data storage bootstrap/cache
-RUN chmod -R 775 storage bootstrap/cache
+# Ensure correct permissions for Apache user
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html
+
+# Create storage directories with proper permissions
+RUN mkdir -p /var/www/html/storage/logs /var/www/html/storage/framework/cache /var/www/html/storage/framework/sessions /var/www/html/storage/framework/views
 RUN chown -R www-data:www-data /var/www/html/storage
 RUN chmod -R 775 /var/www/html/storage
 
